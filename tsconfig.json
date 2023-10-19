@@ -10,11 +10,14 @@
       "components/*": [
         "./src/components/*"
       ],
-      "contexts/*": [
-        "./src/contexts/*"
+      "context/*": [
+        "./src/context/*"
+      ],
+      "config/*": [
+        "./src/config/*"
       ],
       "env/*": [
-        "./src/env/*"
+        "/src/env/*"
       ],
       "helpers/*": [
         "./src/helpers/*"
