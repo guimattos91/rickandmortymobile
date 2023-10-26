@@ -1,21 +1,24 @@
-import { memo, useEffect, useCallback } from 'react';
+import React, { memo, useEffect, useCallback, useState } from 'react';
 import { Text, View } from '@gluestack-ui/themed';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LoadingComponent } from 'components/LoadingComponent';
 import { useCharacters } from 'context/CharactersContext';
-import { RootStackParamListType } from 'routes/index';
+import { HomeRouterParamListType } from 'routes/homeRoute/index';
 import { CharacterCard } from './CharacterCard';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type CharactersScreenType = NativeStackScreenProps<
-  RootStackParamListType,
+  HomeRouterParamListType,
   'Characters'
 >;
 
 const Screen: React.FC<CharactersScreenType> = ({ navigation }) => {
-  const { characters, fetchCharacters, isLoading, totalPages } =
+  const { characters, isLoading, currentPage, totalPages, fetchCharacters } =
     useCharacters();
+
+  const [isFetching, setIsFetching] = useState(false);
 
   const Header = useCallback(
     () => (
@@ -34,15 +37,17 @@ const Screen: React.FC<CharactersScreenType> = ({ navigation }) => {
     [],
   );
   const Footer = useCallback(
-    () =>
-      totalPages ? (
-        <View flex={1} justifyContent="center" alignItems="center" my={16}>
-          <Text>Loading...</Text>
-        </View>
-      ) : undefined,
-    [totalPages],
+    () => (currentPage < totalPages ? <LoadingComponent /> : undefined),
+    [totalPages, currentPage],
   );
 
+  const onEndReached = useCallback(async () => {
+    if (currentPage < totalPages && !isFetching) {
+      setIsFetching(true);
+      await fetchCharacters(currentPage + 1);
+      setIsFetching(false);
+    }
+  }, [currentPage, fetchCharacters, isFetching, totalPages]);
   useEffect(() => {
     fetchCharacters(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -50,31 +55,23 @@ const Screen: React.FC<CharactersScreenType> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#272b33' }}>
-      <View
-        flexDirection="row"
-        bgColor="#272b33"
-        borderBottomEndRadius={24}
-        borderBottomStartRadius={24}
-        alignItems="flex-end"
-      >
-        {isLoading && <Text>Loading...</Text>}
-        {!isLoading && characters && (
-          <FlatList
-            data={characters}
-            renderItem={({ item }) => (
-              <CharacterCard
-                character={item}
-                onPress={() =>
-                  navigation.navigate('Character', { character: item })
-                }
-              />
-            )}
-            keyExtractor={(_, index) => index.toString()}
-            ListHeaderComponent={Header}
-            ListFooterComponent={Footer}
-          />
-        )}
-      </View>
+      {(!isLoading || characters.length > 0) && (
+        <FlatList
+          data={characters}
+          renderItem={({ item }) => (
+            <CharacterCard
+              character={item}
+              onPress={() =>
+                navigation.navigate('Character', { character: item })
+              }
+            />
+          )}
+          keyExtractor={(_, index) => index.toString()}
+          ListHeaderComponent={Header}
+          ListFooterComponent={Footer}
+          onEndReached={onEndReached}
+        />
+      )}
     </SafeAreaView>
   );
 };

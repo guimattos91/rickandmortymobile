@@ -41,10 +41,15 @@ export const EpisodesProvider: React.FC<IEpisodesProviderProps> = ({
 
     try {
       const response = await Api.get(`/episode/?page=${page}`);
-      setEpisodes(response.data.results);
+      // eslint-disable-next-line prettier/prettier
+      setEpisodes((prevEpisodes) => [
+        ...prevEpisodes,
+        ...response.data.results,
+      ]);
       setTotalPages(response.data.info.pages);
+      setCurrentPage(page);
     } catch {
-      setError('Erro: Não achamos Nenhum Personagem');
+      setError('Error: Can not load episodes');
     } finally {
       setIsLoading(false);
     }

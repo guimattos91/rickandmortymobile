@@ -38,20 +38,36 @@ export const CharactersProvider: React.FC<ICharactersProviderProps> = ({
   const [currentPage, setCurrentPage] = useState(0);
 
   const fetchCharacters = useCallback(async (page: number) => {
-    setCurrentPage(page);
     setIsLoading(true);
     setError(null);
 
     try {
       const response = await Api.get(`/character/?page=${page}`);
-      setCharacters(response.data.results);
+      // eslint-disable-next-line prettier/prettier
+      setCharacters((prevCharacters) => [
+        ...prevCharacters,
+        ...response.data.results,
+      ]);
       setTotalPages(response.data.info.pages);
+      setCurrentPage(page);
     } catch {
-      setError('Erro: Não achamos Nenhum Personagem');
+      setError('Error: Can not find Characters');
     } finally {
       setIsLoading(false);
     }
   }, []);
+
+  // const fetchNextPage = useCallback(() => {
+  //   // eslint-disable-next-line prettier/prettier
+  //   if (!isFetching) setCurrentPage((prev) => prev + 1);
+  // }, [isFetching]);
+
+  // const loadMoreCharacters = useCallback(() => {
+  //   if (currentPage < totalPages && !isFetching) {
+  //     setIsFetching(true);
+  //     fetchCharacters(currentPage + 1).then(() => setIsFetching(false));
+  //   }
+  // }, [currentPage, totalPages, isFetching, fetchCharacters]);
 
   const fetchCharacter = useCallback(async (id: number | string) => {
     setIsLoading(true);

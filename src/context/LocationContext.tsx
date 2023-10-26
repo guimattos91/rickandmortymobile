@@ -38,14 +38,18 @@ export const LocationProvider: React.FC<ILocationProviderProps> = ({
   const [currentPage, setCurrentPage] = useState(0);
 
   const fetchLocations = useCallback(async (page: number) => {
-    setCurrentPage(page);
     setIsLoading(true);
     setError(null);
 
     try {
       const response = await Api.get(`/location/?page=${page}`);
-      setLocations(response.data.results);
+      // eslint-disable-next-line arrow-parens
+      setLocations(prevLocations => [
+        ...prevLocations,
+        ...response.data.results,
+      ]);
       setTotalPages(response.data.info.pages);
+      setCurrentPage(page);
     } catch {
       setError('Error: Não achamos Nenhum Local');
     } finally {

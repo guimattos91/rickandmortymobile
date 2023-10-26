@@ -1,4 +1,5 @@
-import React, { memo } from 'react';
+import React, { memo, useState, useEffect } from 'react';
+import { FontAwesome } from '@expo/vector-icons';
 import { View, Text, Image } from '@gluestack-ui/themed';
 import { TouchableOpacity } from 'react-native';
 import { CharactersType } from 'types/CharacterType';
@@ -9,6 +10,14 @@ interface ICharacterCardtProps {
 }
 
 const Component: React.FC<ICharacterCardtProps> = ({ character, onPress }) => {
+  const [colorCircle, setColorCircle] = useState('red');
+
+  useEffect(() => {
+    if (character.status === 'Alive') {
+      setColorCircle('green');
+    }
+  }, [character.status]);
+
   return (
     <TouchableOpacity
       style={{ flex: 1, alignItems: 'center' }}
@@ -37,13 +46,17 @@ const Component: React.FC<ICharacterCardtProps> = ({ character, onPress }) => {
           <Text color="white" bold>
             {character.name}
           </Text>
-          <Text color="white" size="xs">
-            {character.species}-{character.status}
-          </Text>
+          <View flexDirection="row" alignItems="center">
+            <FontAwesome name="circle" size={7} color={colorCircle} />
+            <Text color="#98a2ab" size="xs" paddingLeft={3}>
+              {character.status} - {character.species}
+            </Text>
+          </View>
+
           <Text color="white" bold size="xs" marginTop={5}>
             Origin:
           </Text>
-          <Text color="white" size="sm">
+          <Text color="#98a2ab" size="sm">
             {character.origin.name}
           </Text>
         </View>
